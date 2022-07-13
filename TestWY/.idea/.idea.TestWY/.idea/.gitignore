@@ -11,3 +11,8 @@
 /dataSources.local.xml
 # 基于编辑器的 HTTP 客户端请求
 /httpRequests/
+#Dictionary
+/../../../../../../../:\Github_Res\URP-CSM\TestWY/Library/
+/../../../../../../../:\Github_Res\URP-CSM\TestWY/Temp/
+/../../../../../../../:\Github_Res\URP-CSM\TestWY/Logs/
+/../../../../../../../:\Github_Res\URP-CSM\TestWY/UserSettings/
