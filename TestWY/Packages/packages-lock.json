@@ -31,23 +31,21 @@
       "url": "https://packages.unity.cn"
     },
     "com.unity.render-pipelines.core": {
-      "version": "7.3.1",
-      "depth": 1,
-      "source": "registry",
+      "version": "file:com.unity.render-pipelines.core@7.3.1",
+      "depth": 0,
+      "source": "embedded",
       "dependencies": {
         "com.unity.ugui": "1.0.0"
-      },
-      "url": "https://packages.unity.cn"
+      }
     },
     "com.unity.render-pipelines.universal": {
-      "version": "7.3.1",
+      "version": "file:com.unity.render-pipelines.universal@7.3.1",
       "depth": 0,
-      "source": "registry",
+      "source": "embedded",
       "dependencies": {
         "com.unity.render-pipelines.core": "7.3.1",
         "com.unity.shadergraph": "7.3.1"
-      },
-      "url": "https://packages.unity.cn"
+      }
     },
     "com.unity.shadergraph": {
       "version": "7.3.1",
