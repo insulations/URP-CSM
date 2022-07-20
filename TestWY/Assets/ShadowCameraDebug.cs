@@ -71,5 +71,26 @@ public class ShadowCameraDebug : MonoBehaviour
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(pos[3],r[3]);
         
+        /*Vector3[] farCorners = new Vector3[4];
+        Vector3[] nearCorners = new Vector3[4];
+        Camera mainCam = Camera.main;
+        mainCam.CalculateFrustumCorners(new Rect(0, 0, 1, 1), mainCam.farClipPlane, Camera.MonoOrStereoscopicEye.Mono, farCorners);
+        mainCam.CalculateFrustumCorners(new Rect(0, 0, 1, 1), mainCam.nearClipPlane, Camera.MonoOrStereoscopicEye.Mono, nearCorners);
+
+        // 视锥体顶点转世界坐标
+        for (int i = 0; i < 4; i++)
+        {
+            farCorners[i] = mainCam.transform.TransformVector(farCorners[i]) ;
+            nearCorners[i] = mainCam.transform.TransformVector(nearCorners[i]) ;
+        }
+        
+        
+        Light light = RenderSettings.sun;
+        Vector3 lightDir = light.transform.rotation * Vector3.forward;
+        if(csm==null) csm = new MyMainLightShadowCasterPass.CSM();
+        Vector4 test = csm.LightSpaceSplitSphere(nearCorners, farCorners, lightDir, mainCam);
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawLine(mainCam.transform.position,new Vector3(test.x,test.y,test.z));
+        Gizmos.DrawWireSphere(test, test.w);*/
     }
 }
