@@ -2,3 +2,5 @@
 Temp
 Logs
 *.csproj
+.idea
+obj
