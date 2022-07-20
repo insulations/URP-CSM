@@ -35,7 +35,7 @@ namespace UnityEngine.Rendering.Universal.Internal
 
         Matrix4x4[] m_MainLightShadowMatrices;
         ShadowSliceData[] m_CascadeSlices;
-        Vector4[] m_CascadeSplitDistances;
+        public Vector4[] m_CascadeSplitDistances;
 
         const string m_ProfilerTag = "Render Main Shadowmap";
         ProfilingSampler m_ProfilingSampler = new ProfilingSampler(m_ProfilerTag);

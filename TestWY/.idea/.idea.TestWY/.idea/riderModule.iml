@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="RIDER_MODULE" version="4">
   <component name="NewModuleRootManager">
+    <content url="file://$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.cn/com.unity.collab-proxy@1.2.16" />
+    <content url="file://$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.cn/com.unity.ext.nunit@1.0.0" />
+    <content url="file://$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.cn/com.unity.ide.rider@1.1.4" />
+    <content url="file://$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.cn/com.unity.ide.vscode@1.2.1" />
+    <content url="file://$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.cn/com.unity.render-pipelines.core@7.3.1" />
+    <content url="file://$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.cn/com.unity.render-pipelines.universal@7.3.1" />
+    <content url="file://$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.cn/com.unity.shadergraph@7.3.1" />
+    <content url="file://$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.cn/com.unity.test-framework@1.1.16" />
+    <content url="file://$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.cn/com.unity.textmeshpro@2.1.1" />
+    <content url="file://$USER_HOME$/AppData/Local/Unity/cache/packages/packages.unity.cn/com.unity.timeline@1.2.16" />
     <content url="file://$MODULE_DIR$/../.." />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
