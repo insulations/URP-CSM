@@ -53,7 +53,8 @@ namespace UnityEditor.Rendering.Universal
             public static GUIContent shadowDepthBias = EditorGUIUtility.TrTextContent("Depth Bias", "Controls the distance at which the shadows will be pushed away from the light. Useful for avoiding false self-shadowing artifacts.");
             public static GUIContent shadowNormalBias = EditorGUIUtility.TrTextContent("Normal Bias", "Controls distance at which the shadow casting surfaces will be shrunk along the surface normal. Useful for avoiding false self-shadowing artifacts.");
             public static GUIContent supportsSoftShadows = EditorGUIUtility.TrTextContent("Soft Shadows", "If enabled pipeline will perform shadow filtering. Otherwise all lights that cast shadows will fallback to perform a single shadow sample.");
-
+            public static GUIContent test = EditorGUIUtility.TrTextContent("Test", "Good try");
+            
             // Post-processing
             public static GUIContent postProcessingFeatureSet = EditorGUIUtility.TrTextContent("Feature Set", "Sets the post-processing solution to use. To future proof your application, use Integrated instead of the comparability mode. Only use compatibility mode if your project still uses the Post-processing V2 package, but be aware that Unity plans to deprecate Post-processing V2 support for the Universal Render Pipeline in the near future.");
             public static GUIContent colorGradingMode = EditorGUIUtility.TrTextContent("Grading Mode", "Defines how color grading will be applied. Operators will react differently depending on the mode.");
@@ -334,9 +335,11 @@ namespace UnityEditor.Rendering.Universal
                 m_ShadowDepthBiasProp.floatValue = EditorGUILayout.Slider(Styles.shadowDepthBias, m_ShadowDepthBiasProp.floatValue, 0.0f, UniversalRenderPipeline.maxShadowBias);
                 m_ShadowNormalBiasProp.floatValue = EditorGUILayout.Slider(Styles.shadowNormalBias, m_ShadowNormalBiasProp.floatValue, 0.0f, UniversalRenderPipeline.maxShadowBias);
                 EditorGUILayout.PropertyField(m_SoftShadowsSupportedProp, Styles.supportsSoftShadows);
+                
                 EditorGUI.indentLevel--;
                 EditorGUILayout.Space();
                 EditorGUILayout.Space();
+                
             }
             EditorGUILayout.EndFoldoutHeaderGroup();
         }

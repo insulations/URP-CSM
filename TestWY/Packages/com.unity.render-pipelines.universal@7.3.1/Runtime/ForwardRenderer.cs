@@ -14,7 +14,8 @@ namespace UnityEngine.Rendering.Universal
 
         ColorGradingLutPass m_ColorGradingLutPass;
         DepthOnlyPass m_DepthPrepass;
-        MainLightShadowCasterPass m_MainLightShadowCasterPass;
+        public MainLightShadowCasterPass m_MainLightShadowCasterPass;
+        MyMainLightShadowCasterPass m_MyMainLightShadowCasterPass;
         AdditionalLightsShadowCasterPass m_AdditionalLightsShadowCasterPass;
         ScreenSpaceShadowResolvePass m_ScreenSpaceShadowResolvePass;
         DrawObjectsPass m_RenderOpaqueForwardPass;
@@ -72,6 +73,7 @@ namespace UnityEngine.Rendering.Universal
 
             // Note: Since all custom render passes inject first and we have stable sort,
             // we inject the builtin passes in the before events.
+            m_MyMainLightShadowCasterPass = new MyMainLightShadowCasterPass();
             m_MainLightShadowCasterPass = new MainLightShadowCasterPass(RenderPassEvent.BeforeRenderingShadows);
             m_AdditionalLightsShadowCasterPass = new AdditionalLightsShadowCasterPass(RenderPassEvent.BeforeRenderingShadows);
             m_DepthPrepass = new DepthOnlyPass(RenderPassEvent.BeforeRenderingPrepasses, RenderQueueRange.opaque, data.opaqueLayerMask);
@@ -170,6 +172,7 @@ namespace UnityEngine.Rendering.Universal
             bool isStereoEnabled = cameraData.isStereoEnabled;
 
             bool mainLightShadows = m_MainLightShadowCasterPass.Setup(ref renderingData);
+            bool myMainLightShadows = m_MyMainLightShadowCasterPass.Setup(ref renderingData);
             bool additionalLightShadows = m_AdditionalLightsShadowCasterPass.Setup(ref renderingData);
             bool transparentsNeedSettingsPass = m_TransparentSettingsPass.Setup(ref renderingData);
 
