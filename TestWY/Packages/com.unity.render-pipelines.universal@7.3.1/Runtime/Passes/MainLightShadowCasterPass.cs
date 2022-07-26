@@ -152,6 +152,28 @@ namespace UnityEngine.Rendering.Universal.Internal
                 m_CascadeSlices[i].Clear();
         }
 
+        void SetCull(ref ScriptableRenderContext context, ref ShadowDrawingSettings settings, Camera cam, int needRendering)
+        {
+            int cullingMask = cam.cullingMask;
+            cam.cullingMask = 1 << needRendering;
+            cam.TryGetCullingParameters(out var cullingParameters);
+            settings.cullingResults = context.Cull(ref cullingParameters);
+            cam.cullingMask = cullingMask;
+        }
+        
+        void SetCull(ref ScriptableRenderContext context, ref ShadowDrawingSettings settings, Camera cam, int[] needRendering)
+        {
+            int cullingMask = cam.cullingMask;
+            cam.cullingMask = 0;
+            foreach (int layer in needRendering)
+            {
+                cam.cullingMask |= (1 << layer);
+            }
+            cam.TryGetCullingParameters(out var cullingParameters);
+            settings.cullingResults = context.Cull(ref cullingParameters);
+            cam.cullingMask = cullingMask;
+        }
+
         void RenderMainLightCascadeShadowmap(ref ScriptableRenderContext context, ref CullingResults cullResults, ref LightData lightData, ref ShadowData shadowData)
         {
             int shadowLightIndex = lightData.mainLightIndex;
@@ -164,6 +186,10 @@ namespace UnityEngine.Rendering.Universal.Internal
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
                 var settings = new ShadowDrawingSettings(cullResults, shadowLightIndex);
+                
+                Camera cam = Camera.main;
+                int[] layers = new int[8] {0, 1, 2, 3, 4, 5, 6, 7};
+                SetCull(ref context,ref settings,cam,layers);
 
                 for (int cascadeIndex = 0; cascadeIndex < m_ShadowCasterCascadesCount; ++cascadeIndex)
                 {
@@ -176,6 +202,8 @@ namespace UnityEngine.Rendering.Universal.Internal
                         ref settings, m_CascadeSlices[cascadeIndex].projectionMatrix, m_CascadeSlices[cascadeIndex].viewMatrix);
                 }
 
+                
+                
                 bool softShadows = shadowLight.light.shadows == LightShadows.Soft && shadowData.supportsSoftShadows;
                 CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.MainLightShadows, true);
                 CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.MainLightShadowCascades, shadowData.mainLightShadowCascadesCount > 1);

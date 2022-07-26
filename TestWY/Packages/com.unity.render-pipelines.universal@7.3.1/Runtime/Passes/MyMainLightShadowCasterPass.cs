@@ -41,9 +41,9 @@ namespace UnityEngine.Rendering.Universal.Internal
 
         public class CSM
         {
-            public float[] splits = {0.07f, 0.13f, 0.25f, 0.55f};
+            public float[] splits = {0.067f, 0.133f, 0.267f, 0.533f};
             public Vector3[] box0,box1,box2,box3;
-            
+            public Vector4[] splitSpheres = new Vector4[4];
             
             // 主相机视锥体
             Vector3[] farCorners = new Vector3[4];
@@ -54,6 +54,9 @@ namespace UnityEngine.Rendering.Universal.Internal
             Vector3[] f1_near = new Vector3[4], f1_far = new Vector3[4];
             Vector3[] f2_near = new Vector3[4], f2_far = new Vector3[4];
             Vector3[] f3_near = new Vector3[4], f3_far = new Vector3[4];
+            
+            //四个视锥体的绘制范围
+            float[] far = new float[4], near = new float[4];
 
             // 齐次坐标矩阵乘法变换
             Vector3 matTransform(Matrix4x4 m, Vector3 v, float w)
@@ -63,37 +66,20 @@ namespace UnityEngine.Rendering.Universal.Internal
                 return new Vector3(v4.x, v4.y, v4.z);
             }
 
-            public Vector4 LightSpaceSplitSphere(Vector3[] nearCorners, Vector3[] farCorners, Vector3 lightDir, Camera cam)
+            public Vector4 LightSpaceSplitSphere(Vector3[] nearCorners, Vector3[] farCorners, float near, float far,Camera cam)
             {
-                /*Matrix4x4 toShadowViewInv = Matrix4x4.LookAt(Vector3.zero, lightDir, Vector3.up);
-                Matrix4x4 toShadowView = toShadowViewInv.inverse;
-                // 视锥体顶点转光源方向
-                for(int i=0; i<4; i++)
-                {
-                    farCorners[i] = matTransform(toShadowView, farCorners[i], 1.0f);
-                    nearCorners[i] = matTransform(toShadowView, nearCorners[i], 1.0f);
-                }*/
                 //计算包围球
-                Vector3 dir_mid = Vector3.Normalize(farCorners[1]+farCorners[2]);
-                float f = Vector3.Distance(farCorners[1], Vector3.zero);
-                float n = Vector3.Distance(nearCorners[1], Vector3.zero);
-                float theta = cam.fieldOfView * 0.5f * Mathf.Deg2Rad;
-                float h = Vector3.Distance(farCorners[1] - nearCorners[1], Vector3.zero)*Mathf.Cos(theta);
-                float a = 2 * n * Mathf.Sin(theta);
-                float b = 2 * f * Mathf.Sin(theta);
-                float y_0 = h / 2 + (Mathf.Pow(a, 2) - Mathf.Pow(b, 2)) / (4 * h);
-                float r = Mathf.Sqrt(Mathf.Pow(b, 2) / 4 + Mathf.Pow(y_0, 2));
-                float PO_2D_length =  f * Mathf.Cos(theta)-y_0;
-                //Vector3 PO_2D = PO_2D_length * dir_mid;
                 
-                float cameraHeight = 2.0f * 10.0f * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad);//视锥体高度
-                var cameraWidth = cameraHeight * cam.aspect;//视锥体宽度
-                float phi  =  Mathf.Atan(cameraWidth * 0.5f / 10.0f) ;
+                float a = Vector3.Distance(cam.transform.position + nearCorners[0],
+                    cam.transform.position + nearCorners[2]);
+                float b = Vector3.Distance(cam.transform.position + farCorners[0],
+                    cam.transform.position + farCorners[2]);
+                float l = far - near;
+                float x = l * 0.5f - (a*a - b*b) / (8.0f * l);
 
-                float PO_3D_length = PO_2D_length / Mathf.Cos(phi);
-                Vector3 PO_3D = cam.transform.forward * PO_3D_length;
-                Vector3 pos = PO_3D + cam.transform.position;
-                //Debug.Log(PO_3D_length);
+                float PO = x + near;
+                Vector3 pos = cam.transform.forward * PO + cam.transform.position;
+                float r = Mathf.Sqrt(a * a * 0.25f + x * x);
                 return new Vector4(pos.x,pos.y,pos.z,r);
             }
             // 计算光源方向包围盒的世界坐标
@@ -148,11 +134,11 @@ namespace UnityEngine.Rendering.Universal.Internal
                 mainCam.CalculateFrustumCorners(new Rect(0, 0, 1, 1), mainCam.farClipPlane, Camera.MonoOrStereoscopicEye.Mono, farCorners);
                 mainCam.CalculateFrustumCorners(new Rect(0, 0, 1, 1), mainCam.nearClipPlane, Camera.MonoOrStereoscopicEye.Mono, nearCorners);
 
-                // 视锥体顶点转世界坐标
+                // 视锥体向量转世界坐标
                 for (int i = 0; i < 4; i++)
                 {
-                    farCorners[i] = mainCam.transform.TransformVector(farCorners[i]) + mainCam.transform.position;
-                    nearCorners[i] = mainCam.transform.TransformVector(nearCorners[i]) + mainCam.transform.position;
+                    farCorners[i] = mainCam.transform.TransformVector(farCorners[i]);
+                    nearCorners[i] = mainCam.transform.TransformVector(nearCorners[i]);
                 }
 
                 // 按照比例划分相机视锥体
@@ -172,12 +158,23 @@ namespace UnityEngine.Rendering.Universal.Internal
                     f3_near[i] = f2_far[i];
                     f3_far[i] = f3_near[i] + dir * splits[3];
                 }
+                
+                //计算绘制距离
+                float dis = mainCam.farClipPlane - mainCam.nearClipPlane;
+                near[0] = mainCam.nearClipPlane;
+                far[0] = mainCam.nearClipPlane + splits[0] * dis;
+                near[1] = far[0];
+                far[1] = near[1] + splits[1] * dis;
+                near[2] = far[1];
+                far[2] = near[2] + splits[2] * dis;
+                near[3] = far[2];
+                far[3] = near[3] + splits[3] * dis;
 
-                // 计算包围盒
-                box0 = LightSpaceAABB(f0_near, f0_far, lightDir);
-                box1 = LightSpaceAABB(f1_near, f1_far, lightDir);
-                box2 = LightSpaceAABB(f2_near, f2_far, lightDir);
-                box3 = LightSpaceAABB(f3_near, f3_far, lightDir);
+                // 计算包围球
+                splitSpheres[0] = LightSpaceSplitSphere(f0_near, f0_far, near[0], far[0], mainCam);
+                splitSpheres[1] = LightSpaceSplitSphere(f1_near, f1_far, near[1], far[1], mainCam);
+                splitSpheres[2] = LightSpaceSplitSphere(f2_near, f2_far, near[2], far[2], mainCam);
+                splitSpheres[3] = LightSpaceSplitSphere(f3_near, f3_far, near[3], far[3], mainCam);
             }
 
             // 画相机视锥体
@@ -215,6 +212,16 @@ namespace UnityEngine.Rendering.Universal.Internal
                 Debug.DrawLine(points[3], points[1], color);
                 Debug.DrawLine(points[3], points[2], color);
                 Debug.DrawLine(points[3], points[7], color);
+            }
+
+            public void DrawSplitSphere()
+            {
+                //DrawFrustum(nearCorners, farCorners, Color.white);
+                Gizmos.color = Color.cyan;
+                Gizmos.DrawWireSphere(splitSpheres[0], splitSpheres[0].w);
+                Gizmos.DrawWireSphere(splitSpheres[1], splitSpheres[1].w);
+                Gizmos.DrawWireSphere(splitSpheres[2], splitSpheres[2].w);
+                Gizmos.DrawWireSphere(splitSpheres[3], splitSpheres[3].w);
             }
 
             public void DebugDraw()

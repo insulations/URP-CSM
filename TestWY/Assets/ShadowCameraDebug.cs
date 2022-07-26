@@ -38,15 +38,17 @@ public class ShadowCameraDebug : MonoBehaviour
         
     }
 
-    void OnDrawGizmosSelected()
+    void DrawUnitySphere()
     {
+        _cameraData = GetComponent<UniversalAdditionalCameraData>();
+        renderer = (ForwardRenderer)_cameraData.scriptableRenderer;
         Vector3[] pos = new Vector3[] {
             new Vector3(renderer.m_MainLightShadowCasterPass.m_CascadeSplitDistances[0].x,
-            renderer.m_MainLightShadowCasterPass.m_CascadeSplitDistances[0].y,
-            renderer.m_MainLightShadowCasterPass.m_CascadeSplitDistances[0].z),
+                renderer.m_MainLightShadowCasterPass.m_CascadeSplitDistances[0].y,
+                renderer.m_MainLightShadowCasterPass.m_CascadeSplitDistances[0].z),
             new Vector3(renderer.m_MainLightShadowCasterPass.m_CascadeSplitDistances[1].x,
-            renderer.m_MainLightShadowCasterPass.m_CascadeSplitDistances[1].y,
-            renderer.m_MainLightShadowCasterPass.m_CascadeSplitDistances[1].z),
+                renderer.m_MainLightShadowCasterPass.m_CascadeSplitDistances[1].y,
+                renderer.m_MainLightShadowCasterPass.m_CascadeSplitDistances[1].z),
             new Vector3(renderer.m_MainLightShadowCasterPass.m_CascadeSplitDistances[2].x,
                 renderer.m_MainLightShadowCasterPass.m_CascadeSplitDistances[2].y,
                 renderer.m_MainLightShadowCasterPass.m_CascadeSplitDistances[2].z),
@@ -62,35 +64,35 @@ public class ShadowCameraDebug : MonoBehaviour
             renderer.m_MainLightShadowCasterPass.m_CascadeSplitDistances[3].w
         } ;
         
-        Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(pos[0],r[0]);
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(pos[1],r[1]);
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(pos[2],r[2]);
+        
+        
+        
+        
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(pos[3],r[3]);
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(pos[2],r[2]);
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(pos[1],r[1]);
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(pos[0],r[0]);
         
-        /*Vector3[] farCorners = new Vector3[4];
-        Vector3[] nearCorners = new Vector3[4];
+        Debug.Log("Cascated1 unity r = "+r[0]);
+    }
+    void OnDrawGizmosSelected()
+    {
         Camera mainCam = Camera.main;
-        mainCam.CalculateFrustumCorners(new Rect(0, 0, 1, 1), mainCam.farClipPlane, Camera.MonoOrStereoscopicEye.Mono, farCorners);
-        mainCam.CalculateFrustumCorners(new Rect(0, 0, 1, 1), mainCam.nearClipPlane, Camera.MonoOrStereoscopicEye.Mono, nearCorners);
-
-        // 视锥体顶点转世界坐标
-        for (int i = 0; i < 4; i++)
-        {
-            farCorners[i] = mainCam.transform.TransformVector(farCorners[i]) ;
-            nearCorners[i] = mainCam.transform.TransformVector(nearCorners[i]) ;
-        }
-        
+        //DrawUnitySphere();
         
         Light light = RenderSettings.sun;
         Vector3 lightDir = light.transform.rotation * Vector3.forward;
         if(csm==null) csm = new MyMainLightShadowCasterPass.CSM();
-        Vector4 test = csm.LightSpaceSplitSphere(nearCorners, farCorners, lightDir, mainCam);
+
         Gizmos.color = Color.cyan;
-        Gizmos.DrawLine(mainCam.transform.position,new Vector3(test.x,test.y,test.z));
-        Gizmos.DrawWireSphere(test, test.w);*/
+        
+        csm.Update(mainCam,lightDir);
+        //Gizmos.DrawWireSphere(csm.splitSpheres[1], csm.splitSpheres[1].w);
+        csm.DrawSplitSphere();
+        Debug.Log("Cascated1 my r = "+ csm.splitSpheres[0].w);
     }
 }
