@@ -197,12 +197,14 @@ half ComputeCascadeIndex(float3 positionWS)
     float3 fromCenter1 = positionWS - _CascadeShadowSplitSpheres1.xyz;
     float3 fromCenter2 = positionWS - _CascadeShadowSplitSpheres2.xyz;
     float3 fromCenter3 = positionWS - _CascadeShadowSplitSpheres3.xyz;
-    float4 distances2 = float4(dot(fromCenter0, fromCenter0), dot(fromCenter1, fromCenter1), dot(fromCenter2, fromCenter2), dot(fromCenter3, fromCenter3));
-
+    //float4 distances2 = float4(dot(fromCenter3, fromCenter3), dot(fromCenter0, fromCenter0), dot(fromCenter1, fromCenter1), dot(fromCenter2, fromCenter2));
+    float4 distances2 = float4(dot(fromCenter0, fromCenter0), dot(fromCenter1, fromCenter1), dot(fromCenter2, fromCenter2),dot(fromCenter3, fromCenter3));
     half4 weights = half4(distances2 < _CascadeShadowSplitSphereRadii);
+    if(weights[3]>0)
+        return 3;
     weights.yzw = saturate(weights.yzw - weights.xyz);
-
-    return 4 - dot(weights, half4(4, 3, 2, 1));
+    
+    return 4 - dot(weights, half4(4, 3, 2,1));
 }
 
 float4 TransformWorldToShadowCoord(float3 positionWS)

@@ -37,6 +37,10 @@ namespace UnityEngine.Rendering.Universal.Internal
         ShadowSliceData[] m_CascadeSlices;
         public Vector4[] m_CascadeSplitDistances;
 
+        public static Vector4 s_LeadSplitDistances;
+        public static Matrix4x4 s_LeadProjectionMatrix;
+        public static Matrix4x4 s_LeadViewMatrix;
+
         const string m_ProfilerTag = "Render Main Shadowmap";
         ProfilingSampler m_ProfilingSampler = new ProfilingSampler(m_ProfilerTag);
 
@@ -106,8 +110,20 @@ namespace UnityEngine.Rendering.Universal.Internal
 
                 if (!success)
                     return false;
+                
             }
 
+            if (m_ShadowCasterCascadesCount > 1)
+            {
+                m_CascadeSplitDistances[m_ShadowCasterCascadesCount - 1] = s_LeadSplitDistances;
+                m_CascadeSlices[m_ShadowCasterCascadesCount - 1].projectionMatrix = s_LeadProjectionMatrix;
+                m_CascadeSlices[m_ShadowCasterCascadesCount - 1].viewMatrix = s_LeadViewMatrix;
+                m_CascadeSlices[m_ShadowCasterCascadesCount - 1].shadowTransform =
+                    ShadowUtils.GetShadowTransform(s_LeadProjectionMatrix, s_LeadViewMatrix);
+                ShadowUtils.ApplySliceTransform(ref m_CascadeSlices[m_ShadowCasterCascadesCount - 1], m_ShadowmapWidth, m_ShadowmapHeight);
+            }
+            
+            
             return true;
         }
 
@@ -189,21 +205,37 @@ namespace UnityEngine.Rendering.Universal.Internal
                 
                 Camera cam = Camera.main;
                 int[] layers = new int[8] {0, 1, 2, 3, 4, 5, 6, 7};
-                SetCull(ref context,ref settings,cam,layers);
+                Light light = shadowLight.light;
+                var shadowCullDistances = new float[32];
+                shadowCullDistances[8] = 0.0f;
+                light.layerShadowCullDistances = shadowCullDistances;
 
-                for (int cascadeIndex = 0; cascadeIndex < m_ShadowCasterCascadesCount; ++cascadeIndex)
+                for (int cascadeIndex = 0; cascadeIndex < m_ShadowCasterCascadesCount-1; ++cascadeIndex)
                 {
+                    
                     var splitData = settings.splitData;
                     splitData.cullingSphere = m_CascadeSplitDistances[cascadeIndex];
                     settings.splitData = splitData;
                     Vector4 shadowBias = ShadowUtils.GetShadowBias(ref shadowLight, shadowLightIndex, ref shadowData, m_CascadeSlices[cascadeIndex].projectionMatrix, m_CascadeSlices[cascadeIndex].resolution);
                     ShadowUtils.SetupShadowCasterConstantBuffer(cmd, ref shadowLight, shadowBias);
+                    
                     ShadowUtils.RenderShadowSlice(cmd, ref context, ref m_CascadeSlices[cascadeIndex],
                         ref settings, m_CascadeSlices[cascadeIndex].projectionMatrix, m_CascadeSlices[cascadeIndex].viewMatrix);
+                    
+                }
+                //SetCull(ref context,ref settings,cam,8);
+                //SetCull(ref context,ref settings,cam,0);
+                {
+                    
+                    var splitData = settings.splitData;
+                    splitData.cullingSphere = m_CascadeSplitDistances[m_ShadowCasterCascadesCount - 1];
+                    settings.splitData = splitData;
+                    Vector4 shadowBias = ShadowUtils.GetShadowBias(ref shadowLight, shadowLightIndex, ref shadowData, m_CascadeSlices[m_ShadowCasterCascadesCount - 1].projectionMatrix, m_CascadeSlices[m_ShadowCasterCascadesCount - 1].resolution);
+                    ShadowUtils.SetupShadowCasterConstantBuffer(cmd, ref shadowLight, shadowBias);
+                    ShadowUtils.RenderShadowSlice(cmd, ref context, ref m_CascadeSlices[m_ShadowCasterCascadesCount - 1],
+                        ref settings, m_CascadeSlices[m_ShadowCasterCascadesCount - 1].projectionMatrix, m_CascadeSlices[m_ShadowCasterCascadesCount - 1].viewMatrix);
                 }
 
-                
-                
                 bool softShadows = shadowLight.light.shadows == LightShadows.Soft && shadowData.supportsSoftShadows;
                 CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.MainLightShadows, true);
                 CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.MainLightShadowCascades, shadowData.mainLightShadowCascadesCount > 1);
