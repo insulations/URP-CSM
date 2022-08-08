@@ -191,20 +191,51 @@ real SampleShadowmap(TEXTURE2D_SHADOW_PARAM(ShadowMap, sampler_ShadowMap), float
     return BEYOND_SHADOW_FAR(shadowCoord) ? 1.0 : attenuation;
 }
 
+real SampleShadowmapLead(TEXTURE2D_SHADOW_PARAM(ShadowMap, sampler_ShadowMap), float4 shadowCoord, ShadowSamplingData samplingData, half4 shadowParams, bool isPerspectiveProjection = true)
+{
+    // Compiler will optimize this branch away as long as isPerspectiveProjection is known at compile time
+    if (isPerspectiveProjection)
+        shadowCoord.xyz /= shadowCoord.w;
+
+    if(shadowCoord.x<0.5||shadowCoord.y<0.5)
+        return 1.0f;
+
+    real attenuation;
+    real shadowStrength = shadowParams.x;
+
+    // TODO: We could branch on if this light has soft shadows (shadowParams.y) to save perf on some platforms.
+    #ifdef _SHADOWS_SOFT
+    attenuation = SampleShadowmapFiltered(TEXTURE2D_SHADOW_ARGS(ShadowMap, sampler_ShadowMap), shadowCoord, samplingData);
+    #else
+    // 1-tap hardware comparison
+    attenuation = SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, shadowCoord.xyz);
+    #endif
+
+    attenuation = LerpWhiteTo(attenuation, shadowStrength);
+
+    // Shadow coords that fall out of the light frustum volume must always return attenuation 1.0
+    // TODO: We could use branch here to save some perf on some platforms.
+    return BEYOND_SHADOW_FAR(shadowCoord) ? 1.0 : attenuation;
+}
+
 half ComputeCascadeIndex(float3 positionWS)
 {
     float3 fromCenter0 = positionWS - _CascadeShadowSplitSpheres0.xyz;
     float3 fromCenter1 = positionWS - _CascadeShadowSplitSpheres1.xyz;
     float3 fromCenter2 = positionWS - _CascadeShadowSplitSpheres2.xyz;
     float3 fromCenter3 = positionWS - _CascadeShadowSplitSpheres3.xyz;
-    //float4 distances2 = float4(dot(fromCenter3, fromCenter3), dot(fromCenter0, fromCenter0), dot(fromCenter1, fromCenter1), dot(fromCenter2, fromCenter2));
     float4 distances2 = float4(dot(fromCenter0, fromCenter0), dot(fromCenter1, fromCenter1), dot(fromCenter2, fromCenter2),dot(fromCenter3, fromCenter3));
     half4 weights = half4(distances2 < _CascadeShadowSplitSphereRadii);
-    if(weights[3]>0)
-        return 3;
     weights.yzw = saturate(weights.yzw - weights.xyz);
+    weights.w = 0;
     
     return 4 - dot(weights, half4(4, 3, 2,1));
+}
+
+//TODO:现在只有四个层级时可用 ，调整到适应各种情况
+float4 TransformWorldToShadowCoordLead(float3 positionWS)
+{
+    return mul(_MainLightWorldToShadow[3], float4(positionWS, 1.0));
 }
 
 float4 TransformWorldToShadowCoord(float3 positionWS)
@@ -227,6 +258,17 @@ half MainLightRealtimeShadow(float4 shadowCoord)
     ShadowSamplingData shadowSamplingData = GetMainLightShadowSamplingData();
     half4 shadowParams = GetMainLightShadowParams();
     return SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture, sampler_MainLightShadowmapTexture), shadowCoord, shadowSamplingData, shadowParams, false);
+}
+
+half MainLightRealtimeShadowLead(float4 shadowCoord)
+{
+    #if !defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+    return 1.0h;
+    #endif
+
+    ShadowSamplingData shadowSamplingData = GetMainLightShadowSamplingData();
+    half4 shadowParams = GetMainLightShadowParams();
+    return SampleShadowmapLead(TEXTURE2D_ARGS(_MainLightShadowmapTexture, sampler_MainLightShadowmapTexture), shadowCoord, shadowSamplingData, shadowParams, false);
 }
 
 half AdditionalLightRealtimeShadow(int lightIndex, float3 positionWS)

@@ -69,7 +69,7 @@ public class ShadowCameraDebug : MonoBehaviour
         
         
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(pos[3],r[3]);
+        Gizmos.DrawSphere(pos[3],r[3]);
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(pos[2],r[2]);
         Gizmos.color = Color.red;
@@ -83,7 +83,6 @@ public class ShadowCameraDebug : MonoBehaviour
     {
         Camera mainCam = Camera.main;
         //DrawUnitySphere();
-        
         Light light = RenderSettings.sun;
         Vector3 lightDir = light.transform.rotation * Vector3.forward;
         if(csm==null) csm = new MyMainLightShadowCasterPass.CSM();
@@ -92,7 +91,8 @@ public class ShadowCameraDebug : MonoBehaviour
         
         csm.Update(mainCam,lightDir);
         //Gizmos.DrawWireSphere(csm.splitSpheres[1], csm.splitSpheres[1].w);
-        csm.DrawSplitSphere();
-        Debug.Log("Cascated1 my r = "+ csm.splitSpheres[0].w);
+        //csm.DrawSplitSphere();
+        DrawUnitySphere();
+        //Debug.Log("Cascated1 my r = "+ csm.splitSpheres[0].w);
     }
 }

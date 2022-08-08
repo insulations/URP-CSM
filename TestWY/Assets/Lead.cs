@@ -7,12 +7,14 @@ using UnityEngine.Rendering.Universal.Internal;
 [ExecuteAlways]
 public class Lead : MonoBehaviour
 {
+    //public GameObject go;
     // Start is called before the first frame update
     Bounds bounds = new Bounds();
     public Vector4 splitSphere = new Vector4();
     private Transform shadowCaster;
     private SkinnedMeshRenderer[] skinmeshes;
     public float shadowNearClipDistance = 10;
+    public float shadowFarClipDistance = 10;
     
     private Matrix4x4 viewMatrix, projMatrix;
     
@@ -98,15 +100,16 @@ public class Lead : MonoBehaviour
     void CalculateMatrix()
     {
         Light light = RenderSettings.sun;
-        
+        //Debug.Log(Vector3.Dot(light.transform.forward,go.transform.forward));
+        //light.layerShadowCullDistances[8] = 0.01f;
         Vector3 o = (Vector3)splitSphere;
         float r = splitSphere.w;
         Vector3 pos = o ;
 
-        farCorners[0] = pos + r * (light.transform.forward - light.transform.right - light.transform.up);
-        farCorners[1] = pos + r * (light.transform.forward - light.transform.right + light.transform.up);
-        farCorners[2] = pos + r * (light.transform.forward + light.transform.right + light.transform.up);
-        farCorners[3] = pos + r * (light.transform.forward + light.transform.right - light.transform.up);
+        farCorners[0] = pos + r * (light.transform.forward*shadowFarClipDistance - light.transform.right - light.transform.up);
+        farCorners[1] = pos + r * (light.transform.forward*shadowFarClipDistance - light.transform.right + light.transform.up);
+        farCorners[2] = pos + r * (light.transform.forward*shadowFarClipDistance + light.transform.right + light.transform.up);
+        farCorners[3] = pos + r * (light.transform.forward*shadowFarClipDistance + light.transform.right - light.transform.up);
         nearCorners[0] = pos + r * (-light.transform.forward*shadowNearClipDistance - light.transform.right - light.transform.up);
         nearCorners[1] = pos + r * (-light.transform.forward*shadowNearClipDistance - light.transform.right + light.transform.up);
         nearCorners[2] = pos + r * (-light.transform.forward*shadowNearClipDistance + light.transform.right + light.transform.up);
@@ -124,7 +127,7 @@ public class Lead : MonoBehaviour
         
         o = viewMatrix.MultiplyPoint(o);
         min = o - new Vector3(r,r,r+shadowNearClipDistance);
-        max = o + new Vector3(r,r,r);
+        max = o + new Vector3(r,r,r+shadowFarClipDistance);
         
         if (SystemInfo.usesReversedZBuffer)
         {
@@ -133,6 +136,7 @@ public class Lead : MonoBehaviour
             viewMatrix.m22 = -viewMatrix.m22;
             viewMatrix.m23 = -viewMatrix.m23;
         }
+        
         Vector4 row0 = new Vector4(2/(max.x - min.x),0, 0,0);
         Vector4 row1 = new Vector4(0, 2 / (max.y - min.y), 0, 0);
         Vector4 row2 = new Vector4(0, 0, -2 / (max.z - min.z), -(max.z + min.z) / (max.z - min.z));
@@ -146,5 +150,6 @@ public class Lead : MonoBehaviour
 
         MainLightShadowCasterPass.s_LeadViewMatrix = viewMatrix;
         MainLightShadowCasterPass.s_LeadProjectionMatrix = projMatrix;
+        MainLightShadowCasterPass.othLength = max.y - min.y;
     }
 }

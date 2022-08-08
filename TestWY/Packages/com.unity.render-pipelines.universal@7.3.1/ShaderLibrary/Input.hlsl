@@ -30,6 +30,7 @@ struct InputData
     half3   normalWS;
     half3   viewDirectionWS;
     float4  shadowCoord;
+    float4  shadowCoordLead;
     half    fogCoord;
     half3   vertexLighting;
     half3   bakedGI;
