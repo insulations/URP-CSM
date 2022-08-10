@@ -29,11 +29,12 @@ struct InputData
     float3  positionWS;
     half3   normalWS;
     half3   viewDirectionWS;
-    float4  shadowCoord;
-    float4  shadowCoordLead;
+    float4  shadowCoord;  
     half    fogCoord;
     half3   vertexLighting;
     half3   bakedGI;
+    float4  shadowCoordLead ;
+    
 };
 
 ///////////////////////////////////////////////////////////////////////////////

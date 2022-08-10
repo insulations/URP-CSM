@@ -19,23 +19,6 @@ public class ShadowCameraDebug : MonoBehaviour
     {
         _cameraData = GetComponent<UniversalAdditionalCameraData>();
         renderer = (ForwardRenderer)_cameraData.scriptableRenderer;
-        //renderer.m_MainLightShadowCasterPass.m_CascadeSplitDistances[0];
-    }
-    void Update()
-    {
-        /*Camera mainCam = Camera.main;
-
-        // 获取光源信息
-        Light light = RenderSettings.sun;
-        Vector3 lightDir = light.transform.rotation * Vector3.forward;
-
-        // 更新 shadowmap
-        if(csm==null) csm = new MyMainLightShadowCasterPass.CSM();
-        csm.Update(mainCam, lightDir);
-        csm.DebugDraw();*/
-
-        //ForwardRenderer fr = asset.GetRenderer(2) as ForwardRenderer;
-        
     }
 
     void DrawUnitySphere()
@@ -63,11 +46,7 @@ public class ShadowCameraDebug : MonoBehaviour
             renderer.m_MainLightShadowCasterPass.m_CascadeSplitDistances[2].w,
             renderer.m_MainLightShadowCasterPass.m_CascadeSplitDistances[3].w
         } ;
-        
-        
-        
-        
-        
+ 
         Gizmos.color = Color.yellow;
         Gizmos.DrawSphere(pos[3],r[3]);
         Gizmos.color = Color.green;

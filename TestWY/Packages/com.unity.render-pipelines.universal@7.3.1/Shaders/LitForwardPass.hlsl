@@ -67,10 +67,15 @@ void InitializeInputData(Varyings input, half3 normalTS, out InputData inputData
     inputData.shadowCoord = input.shadowCoord;
 #elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
     inputData.shadowCoord = TransformWorldToShadowCoord(inputData.positionWS);
+#ifdef _USE_LEAD_CASCADE   
     inputData.shadowCoordLead = TransformWorldToShadowCoordLead(inputData.positionWS);
+#endif
+
 #else
     inputData.shadowCoord = float4(0, 0, 0, 0);
+    #ifdef _USE_LEAD_CASCADE
     inputData.shadowCoordLead = float4(0, 0, 0, 0);
+    #endif
 #endif
 
     inputData.fogCoord = input.fogFactorAndVertexLight.x;

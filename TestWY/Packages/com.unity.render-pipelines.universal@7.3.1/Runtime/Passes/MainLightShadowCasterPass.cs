@@ -42,6 +42,7 @@ namespace UnityEngine.Rendering.Universal.Internal
         public static Matrix4x4 s_LeadViewMatrix;
 
         public static float othLength;
+        public static bool useLeadCascade;
 
         const string m_ProfilerTag = "Render Main Shadowmap";
         ProfilingSampler m_ProfilingSampler = new ProfilingSampler(m_ProfilerTag);
@@ -114,6 +115,9 @@ namespace UnityEngine.Rendering.Universal.Internal
                     return false;
                 
             }
+
+            if (!useLeadCascade)
+                return true;
 
             if (m_ShadowCasterCascadesCount > 1)
             {
@@ -208,38 +212,50 @@ namespace UnityEngine.Rendering.Universal.Internal
                 Camera cam = Camera.main;
                 int[] layers = new int[8] {0, 1, 2, 3, 4, 5, 6, 7};
                 Light light = shadowLight.light;
-                
-                SetCull(ref context, ref settings, cam , layers);
-                
-                for (int cascadeIndex = 0; cascadeIndex < m_ShadowCasterCascadesCount-1; ++cascadeIndex)
+             
+                if (!useLeadCascade)
                 {
-                    var splitData = settings.splitData;
-                    splitData.cullingSphere = m_CascadeSplitDistances[cascadeIndex];
-                    settings.splitData = splitData;
-                    Vector4 shadowBias = ShadowUtils.GetShadowBias(ref shadowLight, shadowLightIndex, ref shadowData, m_CascadeSlices[cascadeIndex].projectionMatrix, m_CascadeSlices[cascadeIndex].resolution);
-                    ShadowUtils.SetupShadowCasterConstantBuffer(cmd, ref shadowLight, shadowBias);
-                    ShadowUtils.RenderShadowSlice(cmd, ref context, ref m_CascadeSlices[cascadeIndex],
-                        ref settings, m_CascadeSlices[cascadeIndex].projectionMatrix, m_CascadeSlices[cascadeIndex].viewMatrix);
+                    for (int cascadeIndex = 0; cascadeIndex < m_ShadowCasterCascadesCount; ++cascadeIndex)
+                    {
+                        var splitData = settings.splitData;
+                        splitData.cullingSphere = m_CascadeSplitDistances[cascadeIndex];
+                        settings.splitData = splitData;
+                        Vector4 shadowBias = ShadowUtils.GetShadowBias(ref shadowLight, shadowLightIndex, ref shadowData, m_CascadeSlices[cascadeIndex].projectionMatrix, m_CascadeSlices[cascadeIndex].resolution);
+                        ShadowUtils.SetupShadowCasterConstantBuffer(cmd, ref shadowLight, shadowBias);
+                        ShadowUtils.RenderShadowSlice(cmd, ref context, ref m_CascadeSlices[cascadeIndex],
+                            ref settings, m_CascadeSlices[cascadeIndex].projectionMatrix, m_CascadeSlices[cascadeIndex].viewMatrix);
                     
+                    }
                 }
-                
-                
-                SetCull(ref context, ref settings, cam , 8);
-                
+                else
                 {
-                    Vector4 shadowBias = ShadowUtils.GetShadowBias(ref shadowLight, shadowLightIndex, ref shadowData, m_CascadeSlices[m_ShadowCasterCascadesCount - 1].projectionMatrix, m_CascadeSlices[m_ShadowCasterCascadesCount - 1].resolution);
-                    ShadowUtils.SetupShadowCasterConstantBuffer(cmd, ref shadowLight, shadowBias);
-                    RenderLeadShadow(cmd,ref context,ref m_CascadeSlices[m_ShadowCasterCascadesCount-1],ref settings,cam,light);
+                    SetCull(ref context, ref settings, cam , layers);
+                    for (int cascadeIndex = 0; cascadeIndex < m_ShadowCasterCascadesCount-1; ++cascadeIndex)
+                    {
+                        var splitData = settings.splitData;
+                        splitData.cullingSphere = m_CascadeSplitDistances[cascadeIndex];
+                        settings.splitData = splitData;
+                        Vector4 shadowBias = ShadowUtils.GetShadowBias(ref shadowLight, shadowLightIndex, ref shadowData, m_CascadeSlices[cascadeIndex].projectionMatrix, m_CascadeSlices[cascadeIndex].resolution);
+                        ShadowUtils.SetupShadowCasterConstantBuffer(cmd, ref shadowLight, shadowBias);
+                        ShadowUtils.RenderShadowSlice(cmd, ref context, ref m_CascadeSlices[cascadeIndex],
+                            ref settings, m_CascadeSlices[cascadeIndex].projectionMatrix, m_CascadeSlices[cascadeIndex].viewMatrix);
+                    }
+                
+                
+                    SetCull(ref context, ref settings, cam , 8);
+                
+                    {
+                        Vector4 shadowBias = ShadowUtils.GetShadowBias(ref shadowLight, shadowLightIndex, ref shadowData, m_CascadeSlices[m_ShadowCasterCascadesCount - 1].projectionMatrix, m_CascadeSlices[m_ShadowCasterCascadesCount - 1].resolution);
+                        ShadowUtils.SetupShadowCasterConstantBuffer(cmd, ref shadowLight, shadowBias);
+                        RenderLeadShadow(cmd,ref context,ref m_CascadeSlices[m_ShadowCasterCascadesCount-1],ref settings,cam,light);
+                    }
                 }
-    
                 bool softShadows = shadowLight.light.shadows == LightShadows.Soft && shadowData.supportsSoftShadows;
                 CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.MainLightShadows, true);
                 CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.MainLightShadowCascades, shadowData.mainLightShadowCascadesCount > 1);
                 CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.SoftShadows, softShadows);
-
                 SetupMainLightShadowReceiverConstants(cmd, shadowLight, softShadows);
             }
-
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
         }
@@ -299,9 +315,6 @@ namespace UnityEngine.Rendering.Universal.Internal
             cmd.EnableScissorRect(new Rect(shadowSliceData.offsetX + 4, shadowSliceData.offsetY + 4, shadowSliceData.resolution - 8, shadowSliceData.resolution - 8));//将shadow map裁剪小一点，防止边缘冲突
             context.ExecuteCommandBuffer(cmd);
             cmd.Clear();
-            //camera.TryGetCullingParameters(out var cullingParameters);
-            //var cullingResults = context.Cull(ref cullingParameters);
-            // config settings
             ShaderTagId shaderTagId = new ShaderTagId("depthonly");
             SortingSettings sortingSettings = new SortingSettings(camera);
             DrawingSettings drawingSettings = new DrawingSettings(shaderTagId, sortingSettings);

@@ -106,6 +106,11 @@ Shader "Universal Render Pipeline/Lit"
             #pragma multi_compile _ _MIXED_LIGHTING_SUBTRACTIVE
 
             // -------------------------------------
+            // CSM with lead cascade defined keywords
+            #pragma multi_compile _ _USE_LEAD_CASCADE
+            #pragma multi_compile _ _LEAD_2_CASCADES
+
+            // -------------------------------------
             // Unity defined keywords
             #pragma multi_compile _ DIRLIGHTMAP_COMBINED
             #pragma multi_compile _ LIGHTMAP_ON

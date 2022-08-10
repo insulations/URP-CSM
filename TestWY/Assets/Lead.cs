@@ -1,53 +1,80 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Rendering.Universal.Internal;
 
 [ExecuteAlways]
 public class Lead : MonoBehaviour
 {
-    //public GameObject go;
-    // Start is called before the first frame update
     Bounds bounds = new Bounds();
-    public Vector4 splitSphere = new Vector4();
-    private Transform shadowCaster;
+    private Vector4 splitSphere = new Vector4();
+    
     private SkinnedMeshRenderer[] skinmeshes;
-    public float shadowNearClipDistance = 10;
-    public float shadowFarClipDistance = 10;
-    
     private Matrix4x4 viewMatrix, projMatrix;
-    
-    private UniversalAdditionalCameraData cameraData;
-
     Vector3[] farCorners = new Vector3[4];
     Vector3[] nearCorners = new Vector3[4];
-    void Start()
-    {
-        shadowCaster = transform;
-        cameraData = Camera.main.gameObject.GetComponent<UniversalAdditionalCameraData>();
-    }
-
+    
+    [Header("使用主角独立层级")]
+    [Space(10)]
+    [Header("注意！该脚本单场景中只应存在一个！")]
+    public bool useLeadCascade = true;
+    [Header("主角的transform")]
+    public Transform shadowCaster;
+    [Header("主角层级近截面增加距离")][Range(0f,50f)]
+    public float shadowNearClipDistance = 10;
+    [Header("主角层级远截面增加距离")][Range(0f,50f)]
+    public float shadowFarClipDistance = 10;
+    
     // Update is called once per frame
     void Update()
     {
-        CalculateSphere();
-        CalculateMatrix();
-        DrawFrustum(nearCorners,farCorners,Color.magenta);
+        MainLightShadowCasterPass.useLeadCascade = useLeadCascade;
+        if (KeyWordSetting())
+        {
+            CalculateSphere();
+            CalculateMatrix();
+        }
+    }
+
+    bool KeyWordSetting()
+    {
+        if (!useLeadCascade)
+        {
+            Shader.DisableKeyword("_USE_LEAD_CASCADE");
+            return false;
+        }
+        UniversalRenderPipelineAsset urpa = (UniversalRenderPipelineAsset) GraphicsSettings.renderPipelineAsset;
+        
+        if (urpa.shadowCascadeOption == ShadowCascadesOption.NoCascades)
+        {
+            Shader.DisableKeyword("_USE_LEAD_CASCADE");
+            useLeadCascade = false;
+            MainLightShadowCasterPass.useLeadCascade = false;
+            return false;
+        } 
+        
+        if (urpa.shadowCascadeOption == ShadowCascadesOption.TwoCascades)
+        {
+            Shader.EnableKeyword("_LEAD_2_CASCADES");
+        }
+        else
+        {
+            Shader.DisableKeyword("_LEAD_2_CASCADES");
+        }
+        Shader.EnableKeyword("_USE_LEAD_CASCADE");
+        return true;
     }
     void CalculateAABB(int boundsCount, SkinnedMeshRenderer skinmeshRender)
     {
         if(boundsCount != 0)
         {
-
             bounds.Encapsulate(skinmeshRender.bounds);
-                
-            
         }
         else
         {
             bounds = skinmeshRender.bounds;
-               
         }
     }
 
@@ -72,8 +99,6 @@ public class Lead : MonoBehaviour
         splitSphere.z = bounds.center.z;
         splitSphere.w = Vector3.Distance(bounds.extents, Vector3.zero)+0.2f;
         MainLightShadowCasterPass.s_LeadSplitDistances = splitSphere;
-        
-        
     }
 
     void DrawFrustum(Vector3[] nearCorners, Vector3[] farCorners, Color color)
@@ -94,14 +119,13 @@ public class Lead : MonoBehaviour
     {
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(splitSphere,splitSphere.w);
-        
+        DrawFrustum(nearCorners,farCorners,Color.magenta);
     }
 
     void CalculateMatrix()
     {
         Light light = RenderSettings.sun;
-        //Debug.Log(Vector3.Dot(light.transform.forward,go.transform.forward));
-        //light.layerShadowCullDistances[8] = 0.01f;
+
         Vector3 o = (Vector3)splitSphere;
         float r = splitSphere.w;
         Vector3 pos = o ;

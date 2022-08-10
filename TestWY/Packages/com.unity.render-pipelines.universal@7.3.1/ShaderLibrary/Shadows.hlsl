@@ -7,6 +7,8 @@
 
 #define SHADOWS_SCREEN 0
 #define MAX_SHADOW_CASCADES 4
+//#define _LEAD_2_CASCADES
+//#define _USE_LEAD_CASCADE
 
 #if !defined(_RECEIVE_SHADOWS_OFF)
     #if defined(_MAIN_LIGHT_SHADOWS)
@@ -196,10 +198,13 @@ real SampleShadowmapLead(TEXTURE2D_SHADOW_PARAM(ShadowMap, sampler_ShadowMap), f
     // Compiler will optimize this branch away as long as isPerspectiveProjection is known at compile time
     if (isPerspectiveProjection)
         shadowCoord.xyz /= shadowCoord.w;
-
-    if(shadowCoord.x<0.5||shadowCoord.y<0.5)
-        return 1.0f;
-
+    #ifdef _LEAD_2_CASCADES
+        if(shadowCoord.x<0.5)
+            return 1.0f;
+    #else
+        if(shadowCoord.x<0.5||shadowCoord.y<0.5)
+            return 1.0f;
+    #endif
     real attenuation;
     real shadowStrength = shadowParams.x;
 
@@ -235,7 +240,11 @@ half ComputeCascadeIndex(float3 positionWS)
 //TODO:现在只有四个层级时可用 ，调整到适应各种情况
 float4 TransformWorldToShadowCoordLead(float3 positionWS)
 {
-    return mul(_MainLightWorldToShadow[3], float4(positionWS, 1.0));
+    #ifdef _LEAD_2_CASCADES
+        return mul(_MainLightWorldToShadow[1], float4(positionWS, 1.0));
+    #else
+        return mul(_MainLightWorldToShadow[3], float4(positionWS, 1.0));
+    #endif  
 }
 
 float4 TransformWorldToShadowCoord(float3 positionWS)

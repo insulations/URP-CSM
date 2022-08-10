@@ -2056,7 +2056,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52ebfdea7ab8ad7469f7950089438a0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  splitSphere: {x: 1.6998321, y: 0.7566945, z: 0.5204344, w: 1.3316251}
+  useLeadCascade: 1
+  shadowCaster: {fileID: 1694388105479348655}
   shadowNearClipDistance: 3
   shadowFarClipDistance: 2.65
 --- !u!1 &1694388105479060881

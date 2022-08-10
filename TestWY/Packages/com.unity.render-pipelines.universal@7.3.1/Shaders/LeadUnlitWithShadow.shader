@@ -50,6 +50,11 @@
             #pragma multi_compile_fog
             #pragma multi_compile_instancing
 
+            // -------------------------------------
+            // Universal Pipeline keywords
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
+
             #include "UnlitInput.hlsl"
 
             struct Attributes
