@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Rendering.Universal.Internal;
+using UnityEngine.Serialization;
 
 [ExecuteAlways]
 public class Lead : MonoBehaviour
@@ -18,14 +19,15 @@ public class Lead : MonoBehaviour
     
     [Header("使用主角独立层级")]
     [Space(10)]
-    [Header("注意！该脚本单场景中只应存在一个！")]
+    [Header("当采用包含主角独立层级的级联阴影时请将最后一层级的比例置为0(最小值)")]
+    [Header("注意！该脚本单场景中只应存在一个！并将主角的层级设置为Lead")]
     public bool useLeadCascade = true;
     [Header("主角的transform")]
     public Transform shadowCaster;
-    [Header("主角层级近截面增加距离")][Range(0f,50f)]
-    public float shadowNearClipDistance = 10;
+    [Header("主角包围球半径增加长度")][Range(0f,30f)]
+    public float radiusAdd = 0.5f;
     [Header("主角层级远截面增加距离")][Range(0f,50f)]
-    public float shadowFarClipDistance = 10;
+    public float shadowFarClipDistance = 3;
     
     // Update is called once per frame
     void Update()
@@ -97,7 +99,7 @@ public class Lead : MonoBehaviour
         splitSphere.x = bounds.center.x;
         splitSphere.y = bounds.center.y;
         splitSphere.z = bounds.center.z;
-        splitSphere.w = Vector3.Distance(bounds.extents, Vector3.zero)+0.2f;
+        splitSphere.w = Vector3.Distance(bounds.extents, Vector3.zero)+radiusAdd;
         MainLightShadowCasterPass.s_LeadSplitDistances = splitSphere;
     }
 
@@ -130,14 +132,14 @@ public class Lead : MonoBehaviour
         float r = splitSphere.w;
         Vector3 pos = o ;
 
-        farCorners[0] = pos + r * (light.transform.forward*shadowFarClipDistance - light.transform.right - light.transform.up);
-        farCorners[1] = pos + r * (light.transform.forward*shadowFarClipDistance - light.transform.right + light.transform.up);
-        farCorners[2] = pos + r * (light.transform.forward*shadowFarClipDistance + light.transform.right + light.transform.up);
-        farCorners[3] = pos + r * (light.transform.forward*shadowFarClipDistance + light.transform.right - light.transform.up);
-        nearCorners[0] = pos + r * (-light.transform.forward*shadowNearClipDistance - light.transform.right - light.transform.up);
-        nearCorners[1] = pos + r * (-light.transform.forward*shadowNearClipDistance - light.transform.right + light.transform.up);
-        nearCorners[2] = pos + r * (-light.transform.forward*shadowNearClipDistance + light.transform.right + light.transform.up);
-        nearCorners[3] = pos + r * (-light.transform.forward*shadowNearClipDistance + light.transform.right - light.transform.up);
+        farCorners[0] = pos + r * (light.transform.forward*(shadowFarClipDistance+1.0f) - light.transform.right - light.transform.up);
+        farCorners[1] = pos + r * (light.transform.forward*(shadowFarClipDistance+1.0f) - light.transform.right + light.transform.up);
+        farCorners[2] = pos + r * (light.transform.forward*(shadowFarClipDistance+1.0f) + light.transform.right + light.transform.up);
+        farCorners[3] = pos + r * (light.transform.forward*(shadowFarClipDistance+1.0f) + light.transform.right - light.transform.up);
+        nearCorners[0] = pos + r * (-light.transform.forward - light.transform.right - light.transform.up);
+        nearCorners[1] = pos + r * (-light.transform.forward - light.transform.right + light.transform.up);
+        nearCorners[2] = pos + r * (-light.transform.forward + light.transform.right + light.transform.up);
+        nearCorners[3] = pos + r * (-light.transform.forward + light.transform.right - light.transform.up);
         
         
         
@@ -150,7 +152,7 @@ public class Lead : MonoBehaviour
         Vector3 max = new Vector3();
         
         o = viewMatrix.MultiplyPoint(o);
-        min = o - new Vector3(r,r,r+shadowNearClipDistance);
+        min = o - new Vector3(r,r,r+radiusAdd);
         max = o + new Vector3(r,r,r+shadowFarClipDistance);
         
         if (SystemInfo.usesReversedZBuffer)
@@ -175,5 +177,6 @@ public class Lead : MonoBehaviour
         MainLightShadowCasterPass.s_LeadViewMatrix = viewMatrix;
         MainLightShadowCasterPass.s_LeadProjectionMatrix = projMatrix;
         MainLightShadowCasterPass.othLength = max.y - min.y;
+        MainLightShadowCasterPass.farOffset = shadowFarClipDistance;
     }
 }

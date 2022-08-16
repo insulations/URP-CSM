@@ -217,7 +217,7 @@ real SampleShadowmapLead(TEXTURE2D_SHADOW_PARAM(ShadowMap, sampler_ShadowMap), f
     #endif
 
     attenuation = LerpWhiteTo(attenuation, shadowStrength);
-
+    
     // Shadow coords that fall out of the light frustum volume must always return attenuation 1.0
     // TODO: We could use branch here to save some perf on some platforms.
     return BEYOND_SHADOW_FAR(shadowCoord) ? 1.0 : attenuation;
@@ -237,7 +237,6 @@ half ComputeCascadeIndex(float3 positionWS)
     return 4 - dot(weights, half4(4, 3, 2,1));
 }
 
-//TODO:现在只有四个层级时可用 ，调整到适应各种情况
 float4 TransformWorldToShadowCoordLead(float3 positionWS)
 {
     #ifdef _LEAD_2_CASCADES

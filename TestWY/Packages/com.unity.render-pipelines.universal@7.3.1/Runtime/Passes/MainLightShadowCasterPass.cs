@@ -43,8 +43,9 @@ namespace UnityEngine.Rendering.Universal.Internal
 
         public static float othLength;
         public static bool useLeadCascade;
+        public static float farOffset;
 
-        const string m_ProfilerTag = "Render Main Shadowmap";
+        const string m_ProfilerTag = "Render Lead Shadowmap";
         ProfilingSampler m_ProfilingSampler = new ProfilingSampler(m_ProfilerTag);
 
         public MainLightShadowCasterPass(RenderPassEvent evt)
@@ -265,8 +266,8 @@ namespace UnityEngine.Rendering.Universal.Internal
             // 配置相机
             camera.transform.rotation = Quaternion.LookRotation(lightDir);
             camera.transform.position = s_LeadSplitDistances; 
-            camera.nearClipPlane = -(s_LeadSplitDistances[3]+2.0f);
-            camera.farClipPlane = s_LeadSplitDistances[3]+2.0f;
+            camera.nearClipPlane = -(s_LeadSplitDistances[3]);
+            camera.farClipPlane = s_LeadSplitDistances[3]+farOffset;
             camera.aspect = 1;
             camera.orthographicSize = othLength * 0.5f;
         }
