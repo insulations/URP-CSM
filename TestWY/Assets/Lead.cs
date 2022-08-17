@@ -28,6 +28,8 @@ public class Lead : MonoBehaviour
     public float radiusAdd = 0.5f;
     [Header("主角层级远截面增加距离")][Range(0f,50f)]
     public float shadowFarClipDistance = 3;
+
+    [Header("主角阴影Bias")] [Range(0f, 1.0f)] public float bias = 0;
     
     // Update is called once per frame
     void Update()
@@ -152,7 +154,7 @@ public class Lead : MonoBehaviour
         Vector3 max = new Vector3();
         
         o = viewMatrix.MultiplyPoint(o);
-        min = o - new Vector3(r,r,r+radiusAdd);
+        min = o - new Vector3(r,r,r-bias);
         max = o + new Vector3(r,r,r+shadowFarClipDistance);
         
         if (SystemInfo.usesReversedZBuffer)
