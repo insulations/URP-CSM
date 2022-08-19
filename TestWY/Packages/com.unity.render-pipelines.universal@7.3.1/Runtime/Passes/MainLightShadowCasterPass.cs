@@ -241,14 +241,11 @@ namespace UnityEngine.Rendering.Universal.Internal
                         ShadowUtils.RenderShadowSlice(cmd, ref context, ref m_CascadeSlices[cascadeIndex],
                             ref settings, m_CascadeSlices[cascadeIndex].projectionMatrix, m_CascadeSlices[cascadeIndex].viewMatrix);
                     }
-                
-                
-                    SetCull(ref context, ref settings, cam , 8);
-                
+
                     {
                         Vector4 shadowBias = ShadowUtils.GetShadowBias(ref shadowLight, shadowLightIndex, ref shadowData, m_CascadeSlices[m_ShadowCasterCascadesCount - 1].projectionMatrix, m_CascadeSlices[m_ShadowCasterCascadesCount - 1].resolution);
-                        ShadowUtils.SetupShadowCasterConstantBuffer(cmd, ref shadowLight, shadowBias);
-                        RenderLeadShadow(cmd,ref context,ref m_CascadeSlices[m_ShadowCasterCascadesCount-1],ref settings,cam,light);
+                        //ShadowUtils.SetupShadowCasterConstantBuffer(cmd, ref shadowLight, shadowBias);
+                        RenderLeadShadow(cmd,ref context,ref m_CascadeSlices[m_ShadowCasterCascadesCount-1],ref settings,cam,light, 8);
                     }
                 }
                 bool softShadows = shadowLight.light.shadows == LightShadows.Soft && shadowData.supportsSoftShadows;
@@ -305,11 +302,12 @@ namespace UnityEngine.Rendering.Universal.Internal
         }
         
         private void RenderLeadShadow(CommandBuffer cmd, ref ScriptableRenderContext context,
-            ref ShadowSliceData shadowSliceData,ref ShadowDrawingSettings settings, Camera camera, Light light)
+            ref ShadowSliceData shadowSliceData,ref ShadowDrawingSettings settings, Camera camera, Light light, int renderingLayer)
         {
             Vector3 lightDir = light.transform.rotation * Vector3.forward;
             SaveMainCameraSettings(ref camera);
             ConfigCameraToShadowSpace(ref camera, lightDir);
+            SetCull(ref context, ref settings, camera , 8);
             context.SetupCameraProperties(camera);
             cmd.SetRenderTarget(m_MainLightShadowmapTexture);
             cmd.SetViewport(new Rect(shadowSliceData.offsetX, shadowSliceData.offsetY, shadowSliceData.resolution, shadowSliceData.resolution));

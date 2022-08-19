@@ -34,7 +34,6 @@ struct InputData
     half3   vertexLighting;
     half3   bakedGI;
     float4  shadowCoordLead ;
-    
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1750,6 +1750,54 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1757466998}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1511294872
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1511294874}
+  - component: {fileID: 1511294873}
+  m_Layer: 0
+  m_Name: LeadController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1511294873
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1511294872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52ebfdea7ab8ad7469f7950089438a0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  useLeadCascade: 1
+  shadowCaster: {fileID: 767087575}
+  radiusAdd: 0.5
+  shadowFarClipDistance: 5
+  bias: 0.1
+--- !u!4 &1511294874
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1511294872}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.3478463, y: 1.4570019, z: 0.6093541}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1550348057 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400256, guid: d87966c4037ba91459a1b7e12df847ec,
@@ -3792,7 +3840,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1694388105479348655}
   - component: {fileID: 1694388105469529679}
-  - component: {fileID: 1694388105479060880}
   m_Layer: 0
   m_Name: Lead
   m_TagString: Untagged
@@ -3800,23 +3847,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1694388105479060880
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1694388105479060879}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52ebfdea7ab8ad7469f7950089438a0d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  useLeadCascade: 1
-  shadowCaster: {fileID: 767087575}
-  radiusAdd: 0.5
-  shadowFarClipDistance: 5
-  bias: 0.1
 --- !u!1 &1694388105479060881
 GameObject:
   m_ObjectHideFlags: 0
