@@ -157,13 +157,11 @@ public class Lead : MonoBehaviour
         min = o - new Vector3(r,r,r-bias);
         max = o + new Vector3(r,r,r+shadowFarClipDistance);
         
-        if (SystemInfo.usesReversedZBuffer)
-        {
-            viewMatrix.m20 = -viewMatrix.m20;
-            viewMatrix.m21 = -viewMatrix.m21;
-            viewMatrix.m22 = -viewMatrix.m22;
-            viewMatrix.m23 = -viewMatrix.m23;
-        }
+        viewMatrix.m20 = -viewMatrix.m20;
+        viewMatrix.m21 = -viewMatrix.m21;
+        viewMatrix.m22 = -viewMatrix.m22;
+        viewMatrix.m23 = -viewMatrix.m23;
+        
         
         Vector4 row0 = new Vector4(2/(max.x - min.x),0, 0,0);
         Vector4 row1 = new Vector4(0, 2 / (max.y - min.y), 0, 0);

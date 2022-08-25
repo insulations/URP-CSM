@@ -82,24 +82,6 @@ namespace UnityEngine.Rendering.Universal
             context.ExecuteCommandBuffer(cmd);
             cmd.Clear();
         }
-        
-        public static void RenderShadowSliceLead(CommandBuffer cmd, ref ScriptableRenderContext context,
-            ref ShadowSliceData shadowSliceData, ref ShadowDrawingSettings settings,
-            Matrix4x4 proj, Matrix4x4 view)
-        {
-            cmd.SetViewport(new Rect(shadowSliceData.offsetX, shadowSliceData.offsetY, shadowSliceData.resolution, shadowSliceData.resolution));
-            cmd.EnableScissorRect(new Rect(shadowSliceData.offsetX + 4, shadowSliceData.offsetY + 4, shadowSliceData.resolution - 8, shadowSliceData.resolution - 8));//将shadow map裁剪小一点，防止边缘冲突
-
-            cmd.SetViewProjectionMatrices(view, proj);
-            context.ExecuteCommandBuffer(cmd);
-            cmd.Clear();
-            context.DrawShadows(ref settings);
-            cmd.DisableScissorRect();
-            context.ExecuteCommandBuffer(cmd);
-            cmd.Clear();
-        }
-
-        
 
         public static void RenderShadowSlice(CommandBuffer cmd, ref ScriptableRenderContext context,
             ref ShadowSliceData shadowSliceData, ref ShadowDrawingSettings settings)
