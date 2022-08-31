@@ -117,9 +117,11 @@ namespace UnityEngine.Rendering.Universal.Internal
                 
             }
 
+            //根据开关控制是否采用主角层级
             if (!useLeadCascade)
                 return true;
 
+            //修改最后一层级为主角层级的数据
             if (m_ShadowCasterCascadesCount > 1)
             {
                 m_CascadeSplitDistances[m_ShadowCasterCascadesCount - 1] = s_LeadSplitDistances;
@@ -174,7 +176,8 @@ namespace UnityEngine.Rendering.Universal.Internal
             for (int i = 0; i < m_CascadeSlices.Length; ++i)
                 m_CascadeSlices[i].Clear();
         }
-
+        
+        //修改剔除数据的方法，修改剔除的层级为：只绘制needRendering代表的一个层级
         void SetCull(ref ScriptableRenderContext context, ref ShadowDrawingSettings settings, Camera cam, int needRendering)
         {
             int cullingMask = cam.cullingMask;
@@ -183,7 +186,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             settings.cullingResults = context.Cull(ref cullingParameters);
             cam.cullingMask = cullingMask;
         }
-        
+        //修改剔除数据的方法，修改剔除的层级为：只绘制needRendering代表的多个层级
         void SetCull(ref ScriptableRenderContext context, ref ShadowDrawingSettings settings, Camera cam, int[] needRendering)
         {
             int cullingMask = cam.cullingMask;
@@ -230,8 +233,8 @@ namespace UnityEngine.Rendering.Universal.Internal
                 }
                 else
                 {
-                    SetCull(ref context, ref settings, cam , layers);
-                    for (int cascadeIndex = 0; cascadeIndex < m_ShadowCasterCascadesCount-1; ++cascadeIndex)
+                    SetCull(ref context, ref settings, cam , layers);       //设置只绘制除了主角层级以外的物体
+                    for (int cascadeIndex = 0; cascadeIndex < m_ShadowCasterCascadesCount-1; ++cascadeIndex)    //绘制除了主角以外层级阴影图
                     {
                         var splitData = settings.splitData;
                         splitData.cullingSphere = m_CascadeSplitDistances[cascadeIndex];
@@ -241,12 +244,8 @@ namespace UnityEngine.Rendering.Universal.Internal
                         ShadowUtils.RenderShadowSlice(cmd, ref context, ref m_CascadeSlices[cascadeIndex],
                             ref settings, m_CascadeSlices[cascadeIndex].projectionMatrix, m_CascadeSlices[cascadeIndex].viewMatrix);
                     }
-
-                    {
-                        Vector4 shadowBias = ShadowUtils.GetShadowBias(ref shadowLight, shadowLightIndex, ref shadowData, m_CascadeSlices[m_ShadowCasterCascadesCount - 1].projectionMatrix, m_CascadeSlices[m_ShadowCasterCascadesCount - 1].resolution);
-                        //ShadowUtils.SetupShadowCasterConstantBuffer(cmd, ref shadowLight, shadowBias);
-                        RenderLeadShadow(cmd,ref context,ref m_CascadeSlices[m_ShadowCasterCascadesCount-1],ref settings,cam,light, 8);
-                    }
+                    RenderLeadShadow(cmd,ref context,ref m_CascadeSlices[m_ShadowCasterCascadesCount-1],ref settings,cam,light, 8);     //绘制除了主角层级阴影图
+                    
                 }
                 bool softShadows = shadowLight.light.shadows == LightShadows.Soft && shadowData.supportsSoftShadows;
                 CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.MainLightShadows, true);
@@ -307,7 +306,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             Vector3 lightDir = light.transform.rotation * Vector3.forward;
             SaveMainCameraSettings(ref camera);
             ConfigCameraToShadowSpace(ref camera, lightDir);
-            SetCull(ref context, ref settings, camera , 8);
+            SetCull(ref context, ref settings, camera , 8); //设置剔除，只绘制主角层级，如果现需要修改主角处在哪一层级，只需要修改此处和RenderMainLightCascadeShadowmap方法中needrendering的值
             context.SetupCameraProperties(camera);
             cmd.SetRenderTarget(m_MainLightShadowmapTexture);
             cmd.SetViewport(new Rect(shadowSliceData.offsetX, shadowSliceData.offsetY, shadowSliceData.resolution, shadowSliceData.resolution));

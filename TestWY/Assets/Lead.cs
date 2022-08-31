@@ -1,4 +1,11 @@
-﻿using System.Collections;
+﻿/*
+ *在本项目中，共修改了MainLightShadowCasterPass.cs, Shadows.hlsl, Input.hlsl, Lighting.hlsl
+ *增加了Lead.cs
+ *其余脚本为测试脚本，无需处理
+ * 
+ */
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -34,7 +41,7 @@ public class Lead : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        MainLightShadowCasterPass.useLeadCascade = useLeadCascade;
+        MainLightShadowCasterPass.useLeadCascade = useLeadCascade;     //设置是否开启主角独立层级的开关
         if (KeyWordSetting())
         {
             CalculateSphere();
@@ -42,7 +49,7 @@ public class Lead : MonoBehaviour
         }
     }
 
-    bool KeyWordSetting()
+    bool KeyWordSetting()      //设置各种关键字宏开关
     {
         if (!useLeadCascade)
         {
@@ -70,7 +77,7 @@ public class Lead : MonoBehaviour
         Shader.EnableKeyword("_USE_LEAD_CASCADE");
         return true;
     }
-    void CalculateAABB(int boundsCount, SkinnedMeshRenderer skinmeshRender)
+    void CalculateAABB(int boundsCount, SkinnedMeshRenderer skinmeshRender)         //获取对应skinnedmesh的AABB
     {
         if(boundsCount != 0)
         {
@@ -82,9 +89,9 @@ public class Lead : MonoBehaviour
         }
     }
 
-    void CalculateAABB()
+    void CalculateAABB()                                                            //获取主角上的全部skinnedmesh的AABB
     {
-        skinmeshes = shadowCaster.GetComponentsInChildren<SkinnedMeshRenderer>();
+        skinmeshes = shadowCaster.GetComponentsInChildren<SkinnedMeshRenderer>();   
         int boundsCount = 0;
 
         for(int i = 0;i <skinmeshes.Length;i++)
@@ -95,7 +102,7 @@ public class Lead : MonoBehaviour
         
     }
 
-    void CalculateSphere()
+    void CalculateSphere()                                                          //根据包围盒生成包围球信息
     {
         CalculateAABB();
         splitSphere.x = bounds.center.x;
@@ -105,7 +112,7 @@ public class Lead : MonoBehaviour
         MainLightShadowCasterPass.s_LeadSplitDistances = splitSphere;
     }
 
-    void DrawFrustum(Vector3[] nearCorners, Vector3[] farCorners, Color color)
+    void DrawFrustum(Vector3[] nearCorners, Vector3[] farCorners, Color color)      //绘制主角层级阴影相机的视锥，用于debug
     {
         for (int i = 0; i < 4; i++)
             Debug.DrawLine(nearCorners[i], farCorners[i], color);
@@ -126,7 +133,7 @@ public class Lead : MonoBehaviour
         DrawFrustum(nearCorners,farCorners,Color.magenta);
     }
 
-    void CalculateMatrix()
+    void CalculateMatrix()                                                          //计算主角层级光源相机的矩阵
     {
         Light light = RenderSettings.sun;
 

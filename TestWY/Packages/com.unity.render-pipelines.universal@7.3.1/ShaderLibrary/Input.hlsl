@@ -33,7 +33,7 @@ struct InputData
     half    fogCoord;
     half3   vertexLighting;
     half3   bakedGI;
-    float4  shadowCoordLead ;
+    float4  shadowCoordLead; //主角层级阴影图uv
 };
 
 ///////////////////////////////////////////////////////////////////////////////

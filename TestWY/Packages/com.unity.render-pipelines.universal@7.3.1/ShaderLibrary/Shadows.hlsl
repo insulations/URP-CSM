@@ -198,6 +198,7 @@ real SampleShadowmapLead(TEXTURE2D_SHADOW_PARAM(ShadowMap, sampler_ShadowMap), f
     // Compiler will optimize this branch away as long as isPerspectiveProjection is known at compile time
     if (isPerspectiveProjection)
         shadowCoord.xyz /= shadowCoord.w;
+    //如果计算出的阴影图上uv不属于主角所在层级的范围，则返回1.0
     #ifdef _LEAD_2_CASCADES
         if(shadowCoord.x<0.5)
             return 1.0f;
@@ -237,7 +238,7 @@ half ComputeCascadeIndex(float3 positionWS)
     return 4 - dot(weights, half4(4, 3, 2,1));
 }
 
-float4 TransformWorldToShadowCoordLead(float3 positionWS)
+float4 TransformWorldToShadowCoordLead(float3 positionWS)       //直接返回主角层级的光源相机变换矩阵
 {
     #ifdef _LEAD_2_CASCADES
         return mul(_MainLightWorldToShadow[1], float4(positionWS, 1.0));
@@ -268,7 +269,7 @@ half MainLightRealtimeShadow(float4 shadowCoord)
     return SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture, sampler_MainLightShadowmapTexture), shadowCoord, shadowSamplingData, shadowParams, false);
 }
 
-half MainLightRealtimeShadowLead(float4 shadowCoord)
+half MainLightRealtimeShadowLead(float4 shadowCoord)    //主角层级的阴影计算
 {
     #if !defined(MAIN_LIGHT_CALCULATE_SHADOWS)
     return 1.0h;

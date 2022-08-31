@@ -122,7 +122,7 @@ Light GetMainLight(float4 shadowCoord,float4 shadowCoordLead)
 {
     Light light = GetMainLight();
     #ifdef _USE_LEAD_CASCADE
-    light.shadowAttenuation = MainLightRealtimeShadow(shadowCoord)*MainLightRealtimeShadowLead(shadowCoordLead);
+    light.shadowAttenuation = MainLightRealtimeShadow(shadowCoord)*MainLightRealtimeShadowLead(shadowCoordLead); //混合主角阴影和其他阴影
     #else
     light.shadowAttenuation = MainLightRealtimeShadow(shadowCoord);
     #endif
